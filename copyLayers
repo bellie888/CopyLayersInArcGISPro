@@ -1,0 +1,59 @@
+# code to save the standard master layers into other maps DIRECTLY
+# takes the list of layers from the standard sheets maps
+# and copies them to the other main maps
+# MapIndex layers are filtered out of the process and remain untouched
+# need to open the .aprx file and run this python in the python window
+# Joseph Bell, Geoscience Australia
+aprx = arcpy.mp.ArcGISProject("CURRENT")
+maps = aprx.listMaps()  # get a list of maps in the project file
+
+for map in maps:
+    # find the Standard sheets map
+    if "Standard Sheets" in map.name:  # must have Standard_Sheets in the name of the map
+        if "X__" not in map.name:  # filter out other map with X__ in its name
+            mainlayers = map.listLayers() # discover layers in the SS map and put in list
+            # feedback on which map in the master and count the layers in it
+            print('found Map ', map.name, ' - with', len(mainlayers), 'layers')  #
+# now we have all the layers in the main, master map standard sheets saved to a python list called mainlayers
+
+
+# correctly filter list of layer names to only include Group names and single lyrs
+# leave out layers within groups or the script will have 2 copies of the group layers
+n=0 
+myGroupsAndSingles = []  # empty list to store the corrected list of layers
+for item in mainlayers:
+    if 'MapIndex' not in item.name: # take the main map mapindex out
+        if item.name == item.longName: # these will ony be group names and single layers
+            n+=1
+            myGroupsAndSingles.append(item)
+
+# now search the .aprx project for all the maps that the master copy layers need to be copied into
+for map in maps:
+    # filter out maps that are not required
+    if "Standard Sheets" not in map.name:
+        # if "Burketown" in map.name:  # only do Burketown
+        if "Main Map" in map.name: # all the maps with Main Map in the name
+            print('')
+            print("for map named", map.name)
+            this_map_layers = map.listLayers()
+            print('found Map', map.name, ' - with', len(this_map_layers), 'layers')
+            
+            # delete the old layers  
+            for mylyr in this_map_layers:  # consider each lyr one by one
+                thisName = str(mylyr.longName)
+                if 'MapIndex' not in thisName:  # filter out the MapIndex layer so it is not deleted
+                    map.removeLayer(mylyr)  # delete the layer
+                    print(thisName, '- layer removed from ', map.name)  # feedback to user
+            
+            #now import the Main map standard sheet layers to the other Main
+            print(' ')
+            print(' ')
+            print ('now copying over layers from the standard sheets map to', map.name)
+            n = 0
+            for mnlyr in myGroupsAndSingles:  # for each standard sheets layer to directly copy over
+                if "MapIndex" not in str(mnlyr.name): # filter the MapIndex out
+                        n+= 1                   
+                        map.addLayer(mnlyr, "BOTTOM")  # it 'knows' which map it is in, so it copies to there
+                        print( n, 'copied over', str(mnlyr.longName), 'to', map.name, )  # feedback to user
+             
+print('FINISHED ALL')
