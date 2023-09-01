@@ -6,10 +6,17 @@ It will take the layers from the Standard Sheets map and copy them over to the o
 The Map Index layer for each map is unique and so is left untouched.
 
 To use:
+
 o Copy the code using standard copy/paste method
+
 o In ESRI PRo, open the python window, 
+
 o into the thin text area at the bottom,
+
 o paste the code, the box will expand to hold your code.
+
 o To Execute the script, ensure the cursor is still at the end of the script and
+
 o press Enter on the keyboard twice quickly
+
 o The script will run and the console will indicate what is happening.
